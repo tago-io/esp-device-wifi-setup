@@ -91,5 +91,6 @@ void setup(void) {
 //    LOOP
 //===============================================================
 void loop(void) {
-  server.handleClient(); //Handle client requests
+  // Handle client requests
+  server.handleClient();
 }
