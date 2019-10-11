@@ -2,28 +2,29 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 
-
-//SSID and Password to your ESP Access Point
+// SSID and Password to your ESP Access Point
 const char * ssid = "TagoIO Device Wifi Setup";
 const char * password = "";
 
-
-ESP8266WebServer server(80); //Server on port 80
+// Server on port 80
+ESP8266WebServer server(80);
 
 //==============================================================
-//     This rutine is exicuted when you open its IP in browser
+//     HTTP Routes
 //==============================================================
 void handleRoot() {
-  Serial.println("http request on /");
+  Serial.println("HTTP GET request on /");
   server.send(200, "application/json", "{\"status\": true }");
 }
 
 void handlePing() {
-  Serial.println("http request on /ping");
+  Serial.println("HTTP GET request on /ping");
   server.send(200, "application/json", "{\"status\": true, \"type\": \"ping\" }");
 }
 
 void handleParams() {
+  Serial.println("HTTP GET request on /setup/params");
+
   int n = WiFi.scanNetworks();
   String ssid_list = "";
   for (int i = 0; i < n; i++) {
@@ -38,9 +39,11 @@ void handleParams() {
   server.send(200, "application/json", result);
 }
 
-void handleSetup() { //Handler for the body path
-  // TODO here you save the data the wifi settings the user typed
-  if (server.hasArg("plain") == false) { //Check if body received
+void handleSetup() {
+  Serial.println("HTTP POST request on /setup");
+
+  // Check if body received
+  if (server.hasArg("plain") == false) {
     server.send(400, "application/json", "{\"status\": false, \"message\": \"body not sent\" }");
     return;
   }
@@ -50,32 +53,42 @@ void handleSetup() { //Handler for the body path
   message += "\n";
 
   Serial.println(message);
+
+  // TODO: here you save the data of the wifi settings the user typed
+
   server.send(200, "application/json", "{\"status\": true, \"type\": \"setup\" }");
 }
 
 //===============================================================
-//                  SETUP
+//    SETUP
 //===============================================================
 void setup(void) {
   Serial.begin(9600);
   Serial.println("");
-  WiFi.mode(WIFI_AP); //Only Access point
-  WiFi.softAP(ssid, password); //Start HOTspot removing password will disable security
 
-  IPAddress myIP = WiFi.softAPIP(); //Get IP address
+  // Only Access point
+  WiFi.mode(WIFI_AP);
+  // Start Hotspot removing password will disable security
+  WiFi.softAP(ssid, password);
+
+  // Get IP address
+  IPAddress myIP = WiFi.softAPIP();
   Serial.print("HotSpt IP:");
   Serial.println(myIP);
 
-  server.on("/", handleRoot); //Which routine to handle at root location
-  server.on("/ping", handlePing); //Which routine to handle at root location
-  server.on("/setup/params", handleParams); //Which routine to handle at root location
+  // Bind routes with functions
+  server.on("/", handleRoot);
+  server.on("/ping", handlePing);
+  server.on("/setup/params", handleParams);
   server.on("/setup", handleSetup);
 
-  server.begin(); //Start server
+  // Start server
+  server.begin();
   Serial.println("HTTP server started");
 }
+
 //===============================================================
-//                     LOOP
+//    LOOP
 //===============================================================
 void loop(void) {
   server.handleClient(); //Handle client requests
