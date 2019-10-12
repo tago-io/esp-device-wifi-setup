@@ -38,7 +38,7 @@ void handleParams() {
     }
   }
 
-  String jsonParams = "[{\"name\": \"name\",\"required\": true,\"type\": \"text\",\"placeholder\": \"Device Name\"},{\"name\": \"ssid\",\"required\": true,\"type\": \"autocomplete\",\"placeholder\": \"SSID\",\"options\": [" + ssid_list + "]},{\"name\": \"password\",\"type\": \"password\",\"placeholder\": \"SSID Password\"}]";
+  String jsonParams = "[{\"name\": \"name\",\"required\": true,\"type\": \"text\",\"placeholder\": \"Device Name\"},{\"name\": \"ssid\",\"required\": true,\"type\": \"autocomplete\",\"placeholder\": \"SSID\",\"options\": [" + ssidList + "]},{\"name\": \"password\",\"type\": \"password\",\"placeholder\": \"SSID Password\"}]";
   server.send(200, "application/json", jsonParams);
 }
 
