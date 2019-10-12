@@ -14,29 +14,32 @@ ESP8266WebServer server(80);
 //==============================================================
 void handleRoot() {
   Serial.println("HTTP GET request on /");
-  server.send(200, "application/json", "{\"status\": true }");
+  server.send(200, "application/json", "{ \"status\": true, \"message\": \"TagoIO Device Wifi Setup - Server Running\" }");
 }
 
 void handlePing() {
   Serial.println("HTTP GET request on /ping");
-  server.send(200, "application/json", "{\"status\": true, \"type\": \"ping\" }");
+  server.send(200, "application/json", "{ \"pong\": true }");
 }
 
 void handleParams() {
   Serial.println("HTTP GET request on /setup/params");
 
-  int n = WiFi.scanNetworks();
-  String ssid_list = "";
-  for (int i = 0; i < n; i++) {
+  int ssidIndexes = WiFi.scanNetworks();
+
+  // Formating SSID list as JSON Array of string
+  // e.g ["My Wifi", "Neighbor's Wifi", "Other Wifi"]
+  String ssidList = "";
+  for (int i = 0; i < ssidIndexes; i++) {
     if (i == 0) {
-      ssid_list = "\"" + WiFi.SSID(i) + "\"";
+      ssidList = "\"" + WiFi.SSID(i) + "\"";
     } else {
-      ssid_list += ",\"" + WiFi.SSID(i) + "\"";
+      ssidList += ",\"" + WiFi.SSID(i) + "\"";
     }
   }
 
-  String result = "[{\"name\": \"name\",\"required\": true,\"type\": \"text\",\"placeholder\": \"Device Name\"},{\"name\": \"ssid\",\"required\": true,\"type\": \"autocomplete\",\"placeholder\": \"SSID\",\"options\": [" + ssid_list + "]},{\"name\": \"password\",\"type\": \"password\",\"placeholder\": \"SSID Password\"}]";
-  server.send(200, "application/json", result);
+  String jsonParams = "[{\"name\": \"name\",\"required\": true,\"type\": \"text\",\"placeholder\": \"Device Name\"},{\"name\": \"ssid\",\"required\": true,\"type\": \"autocomplete\",\"placeholder\": \"SSID\",\"options\": [" + ssid_list + "]},{\"name\": \"password\",\"type\": \"password\",\"placeholder\": \"SSID Password\"}]";
+  server.send(200, "application/json", jsonParams);
 }
 
 void handleSetup() {
@@ -44,7 +47,7 @@ void handleSetup() {
 
   // Check if body received
   if (server.hasArg("plain") == false) {
-    server.send(400, "application/json", "{\"status\": false, \"message\": \"body not sent\" }");
+    server.send(400, "application/json", "{ \"status\": false, \"message\": \"body not sent\" }");
     return;
   }
 
@@ -56,7 +59,7 @@ void handleSetup() {
 
   // TODO: here you save the data of the wifi settings the user typed
 
-  server.send(200, "application/json", "{\"status\": true, \"type\": \"setup\" }");
+  server.send(200, "application/json", "{ \"status\": true }");
 }
 
 //===============================================================
